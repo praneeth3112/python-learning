@@ -3,7 +3,7 @@ usn_no = str(input('enter the usn of the student : '))
 branch = str(input('enter the branch of the student : '))
 semester = int(input('enter ur current semester(1 - 8) : '))
 if 1<=semester<=8 :
-    print('current semester : semester')
+    print(f'current semester : {semester}')
 else :
     print('invalid')
 subject1 = float(input('enter ur marks in subject1(0-100)'))
