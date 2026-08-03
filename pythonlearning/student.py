@@ -16,5 +16,6 @@ print(f'usn of the student is {usn_no}')
 print(f'branch of the student is {branch}')
 print(f'current semester of the student is {semester}')
 print(f'average marks of the student in 3 subjects is {average}')
+print('testing github push')
 
  
