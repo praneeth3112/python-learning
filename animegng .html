@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Manga Tracker</title>
+  <style>
+    :root {
+      --bg: #0e0b1a;
+      --bg-gradient: radial-gradient(circle at 70% 0%, #2b1a4d 0%, #120e24 45%, #0a0814 100%);
+      --card: rgba(24, 19, 44, 0.88);
+      --card-solid: #18132c;
+      --row-hover: rgba(139, 92, 246, 0.08);
+      --border: rgba(139, 92, 246, 0.22);
+      --border-soft: rgba(255, 255, 255, 0.07);
+      --text: #f3f0ff;
+      --text-muted: #9890b5;
+      --purple: #7c3aed;
+      --purple-bright: #9353ff;
+      --purple-glow: rgba(124, 58, 237, 0.45);
+      --star: #fbbf24;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg-gradient);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    /* Hero Banner */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #160f2e 0%, #261647 55%, #191233 100%);
+    }
+
+    .hero-art {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .torii-icon {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 16px rgba(147, 83, 255, 0.45));
+    }
+
+    .hero-title {
+      font-size: 2.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .hero-title span {
+      color: #a855f7;
+      text-shadow: 0 0 24px rgba(168, 85, 247, 0.4);
+    }
+
+    .hero-sub {
+      color: #c4bddb;
+      font-size: 0.98rem;
+      margin-top: 4px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-glass {
+      background: rgba(20, 15, 38, 0.72);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-glass:hover {
+      border-color: var(--purple-bright);
+      background: rgba(124, 58, 237, 0.22);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px 24px 0;
+    }
+
+    /* Optional Collapsible AI & Dataset Drawer */
+    .ai-drawer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .ai-drawer.open {
+      display: flex;
+    }
+
+    .drawer-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .drawer-input {
+      background: rgba(11, 8, 22, 0.75);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      flex: 1;
+      min-width: 210px;
+      outline: none;
+    }
+
+    .drawer-input:focus {
+      border-color: var(--purple-bright);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--purple-glow);
+    }
+
+    .btn-purple:hover {
+      opacity: 0.92;
+    }
+
+    /* Controls Toolbar (Matches Screenshot) */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 230px;
+      max-width: 360px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(24, 19, 44, 0.8);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-box input:focus {
+      border-color: var(--purple-bright);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(24, 19, 44, 0.72);
+      color: #d6cff0;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--purple-bright);
+      color: #fff;
+    }
+
+    .pill-btn.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+      box-shadow: 0 0 18px var(--purple-glow);
+    }
+
+    .completed-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(24, 19, 44, 0.85);
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #d6cff0;
+    }
+
+    .counter-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.3);
+      border: 1px solid var(--purple-bright);
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      color: #ddd6fe;
+    }
+
+    /* Manga Table Card (Matches Screenshot) */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(12px);
+    }
+
+    .manga-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .manga-table thead th {
+      text-align: left;
+      padding: 16px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e2dcf8;
+      background: rgba(37, 29, 68, 0.75);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .manga-table thead th:last-child {
+      text-align: center;
+      width: 140px;
+    }
+
+    .th-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .manga-row {
+      border-bottom: 1px solid var(--border-soft);
+      transition: background 0.14s ease;
+    }
+
+    .manga-row:last-child {
+      border-bottom: none;
+    }
+
+    .manga-row:hover {
+      background: var(--row-hover);
+    }
+
+    .manga-row td {
+      padding: 12px 20px;
+      vertical-align: middle;
+    }
+
+    /* Manga Name Cell */
+    .manga-cell {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+    }
+
+    .manga-thumb {
+      width: 82px;
+      height: 46px;
+      border-radius: 7px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .manga-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .manga-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.15s ease;
+    }
+
+    .manga-row.is-completed .manga-title {
+      text-decoration: line-through;
+      color: #797296;
+    }
+
+    .manga-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .ai-reason {
+      font-size: 0.76rem;
+      color: #c4b5fd;
+      margin-top: 2px;
+    }
+
+    /* Genre Pill Badges */
+    .genre-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .g-adventure { background: #1d4ed8; }
+    .g-action { background: #991b1b; }
+    .g-fantasy { background: #6d28d9; }
+    .g-thriller { background: #15803d; }
+    .g-mystery { background: #0f766e; }
+    .g-drama { background: #7e22ce; }
+    .g-comedy { background: #b45309; }
+    .g-romance { background: #be185d; }
+    .g-sports { background: #0369a1; }
+    .g-scifi { background: #4338ca; }
+    .g-default { background: #475569; }
+
+    /* Rating Cell */
+    .rating-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e9e4fa;
+    }
+
+    .star-icon {
+      color: var(--star);
+      font-size: 1.05rem;
+    }
+
+    /* Custom Purple Checkbox (Matches Screenshot) */
+    .check-cell {
+      text-align: center;
+    }
+
+    .check-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2px solid #594e7a;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      transition: all 0.15s ease;
+    }
+
+    .check-btn:hover {
+      border-color: var(--purple-bright);
+    }
+
+    .check-btn.checked {
+      background: var(--purple-bright);
+      border-color: var(--purple-bright);
+      box-shadow: 0 0 12px var(--purple-glow);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Details Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 6, 18, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #18132c;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 580px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 720px) {
+      .hero-title { font-size: 1.7rem; }
+      .manga-table thead th:nth-child(2),
+      .manga-row td:nth-child(2) {
+        display: none;
+      }
+      .manga-thumb {
+        width: 58px;
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Atmospheric Sakura & Night Sky Hero Banner -->
+  <header class="hero">
+    <svg class="hero-art" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="moonGlow" cx="68%" cy="42%" r="22%">
+          <stop offset="0%" stop-color="#f5f3ff" stop-opacity="0.95" />
+          <stop offset="30%" stop-color="#c4b5fd" stop-opacity="0.35" />
+          <stop offset="100%" stop-color="#160f2e" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="1200" height="220" fill="url(#moonGlow)" />
+      <circle cx="815" cy="86" r="34" fill="#ede9fe" opacity="0.9" />
+      <!-- Stars -->
+      <circle cx="190" cy="44" r="1.5" fill="#e9d5ff" opacity="0.8" />
+      <circle cx="340" cy="28" r="1.2" fill="#e9d5ff" opacity="0.7" />
+      <circle cx="510" cy="60" r="1.8" fill="#ddd6fe" opacity="0.7" />
+      <circle cx="640" cy="34" r="1.4" fill="#e9d5ff" opacity="0.6" />
+      <circle cx="960" cy="40" r="1.6" fill="#e9d5ff" opacity="0.8" />
+      <circle cx="1050" cy="95" r="1.2" fill="#e9d5ff" opacity="0.6" />
+      <!-- Sakura Blossoms (Top Left & Right) -->
+      <g fill="#f472b6" opacity="0.35">
+        <circle cx="42" cy="28" r="10" /><circle cx="64" cy="18" r="8" /><circle cx="88" cy="32" r="9" />
+        <circle cx="24" cy="52" r="7" /><circle cx="112" cy="18" r="6" />
+        <circle cx="1115" cy="28" r="11" /><circle cx="1145" cy="42" r="13" /><circle cx="1175" cy="24" r="10" />
+        <circle cx="1085" cy="56" r="8" /><circle cx="1160" cy="76" r="9" /><circle cx="1125" cy="88" r="7" />
+      </g>
+    </svg>
+
+    <div class="hero-inner">
+      <div class="hero-brand">
+        <!-- Torii Gate Icon -->
+        <svg class="torii-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 16C20 20 44 20 56 16L58 11C44 15 20 15 6 11L8 16Z" fill="#a855f7" />
+          <rect x="12" y="23" width="40" height="5" rx="2" fill="#9333ea" />
+          <rect x="18" y="16" width="6" height="40" rx="2" fill="#a855f7" />
+          <rect x="40" y="16" width="6" height="40" rx="2" fill="#a855f7" />
+          <rect x="29" y="16" width="6" height="9" fill="#7c3aed" />
+        </svg>
+
+        <div>
+          <h1 class="hero-title">My <span>Manga</span> Tracker</h1>
+          <p class="hero-sub">Track your favourite manga and completed series.</p>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn-glass" id="toggleAiDrawerBtn">✨ Gemini AI &amp; Dataset</button>
+        <label class="btn-glass" for="csvFileInput" style="cursor:pointer;">
+          📥 Upload CSV
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none;" />
+        </label>
+        <button class="btn-glass" id="resetBtn">↻ Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Collapsible Gemini API Key & Live Dataset Drawer -->
+    <section class="ai-drawer" id="aiDrawer">
+      <div class="drawer-row">
+        <input type="password" id="geminiKeyInput" class="drawer-input" placeholder="Paste Google Gemini API Key (AIza...) for AI manga picks" />
+        <input type="text" id="geminiPromptInput" class="drawer-input" placeholder="Optional mood (e.g. 'Dark psychological manga like Monster')" />
+        <button class="btn-purple" id="askGeminiBtn">✨ Ask Gemini AI</button>
+      </div>
+      <div class="drawer-row" style="justify-content:space-between; font-size:0.78rem; color:var(--text-muted);">
+        <span id="datasetStatus">Loading live manga dataset from AniList...</span>
+        <span id="geminiStatus">Enter Gemini API Key to unlock AI suggestions</span>
+      </div>
+    </section>
+
+    <!-- Search, Filter Pills & Completed Counter (Screenshot Layout) -->
+    <section class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search manga..." />
+        </div>
+
+        <div class="filter-pills">
+          <button class="pill-btn active" data-filter="all">All</button>
+          <button class="pill-btn" data-filter="completed">Completed</button>
+          <button class="pill-btn" data-filter="pending">Pending</button>
+          <button class="pill-btn" data-filter="gemini">✨ Gemini Picks</button>
+        </div>
+      </div>
+
+      <div class="completed-counter">
+        <span class="counter-check">✓</span>
+        <span>Completed: <strong id="completedRatio">0 / 0</strong></span>
+      </div>
+    </section>
+
+    <!-- 4-Column Manga Table -->
+    <section class="table-card">
+      <table class="manga-table">
+        <thead>
+          <tr>
+            <th><span class="th-inner">📖 Manga Name</span></th>
+            <th><span class="th-inner">🎭 Genre</span></th>
+            <th><span class="th-inner">★ Rating</span></th>
+            <th><span class="th-inner">✓ Completed</span></th>
+          </tr>
+        </thead>
+        <tbody id="mangaTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Pagination -->
+    <div class="pagination" id="paginationBar"></div>
+  </main>
+
+  <!-- Manga Details Modal -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="modalTitle" style="font-size:1.3rem;">Manga Title</h2>
+          <p id="modalMeta" style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;"></p>
+        </div>
+        <button class="btn-glass" id="closeModalBtn">✕ Close</button>
+      </div>
+      <p id="modalDesc" style="font-size:0.88rem; color:#d6cff0; line-height:1.6;"></p>
+    </div>
+  </div>
+
+  <script>
+    const THUMB_COLORS = [
+      "linear-gradient(135deg, #312e81, #4f46e5)",
+      "linear-gradient(135deg, #7f1d1d, #dc2626)",
+      "linear-gradient(135deg, #064e3b, #059669)",
+      "linear-gradient(135deg, #581c87, #9333ea)",
+      "linear-gradient(135deg, #7c2d12, #ea580c)",
+      "linear-gradient(135deg, #0c4a6e, #0284c7)"
+    ];
+
+    // Fallback Starter Manga List (replaced/augmented when AniList loads)
+    const SEED_MANGA = [
+      { id: 30013, title: "One Piece", genre: "Adventure", rating: 9.2, chapters: 1130, image: "", desc: "Monkey D. Luffy sets sail with his Straw Hat crew to find the legendary treasure One Piece." },
+      { id: 30002, title: "Berserk", genre: "Dark Fantasy", rating: 9.5, chapters: 375, image: "", desc: "Guts, the Black Swordsman, battles demonic forces in a brutal medieval world while seeking vengeance." },
+      { id: 31706, title: "Steel Ball Run", genre: "Action", rating: 9.3, chapters: 96, image: "", desc: "Johnny Joestar and Gyro Zeppeli compete in a deadly cross-country race across 1890 America." },
+      { id: 30656, title: "Vagabond", genre: "Action", rating: 9.3, chapters: 327, image: "", desc: "Miyamoto Musashi's relentless quest for enlightenment through the way of the sword." },
+      { id: 30001, title: "Monster", genre: "Thriller", rating: 9.2, chapters: 162, image: "", desc: "Neurosurgeon Kenzou Tenma's choice to save a young boy entangles him in a chain of murders." },
+      { id: 30642, title: "Vinland Saga", genre: "Adventure", rating: 9.1, chapters: 215, image: "", desc: "Young Viking warrior Thorfinn confronts the true meaning of a warrior in 11th-century Europe." },
+      { id: 30051, title: "Slam Dunk", genre: "Sports", rating: 9.1, chapters: 276, image: "", desc: "Delinquent Hanamichi Sakuragi joins his high school basketball team and discovers a true passion." },
+      { id: 30025, title: "Fullmetal Alchemist", genre: "Fantasy", rating: 9.0, chapters: 116, image: "", desc: "Brothers Edward and Alphonse Elric search for the Philosopher's Stone to restore their bodies." },
+      { id: 105778, title: "Chainsaw Man", genre: "Action", rating: 8.7, chapters: 185, image: "", desc: "Denji merges with his chainsaw devil pet Pochita and hunts devils in Tokyo." },
+      { id: 101517, title: "Jujutsu Kaisen", genre: "Action", rating: 8.4, chapters: 271, image: "", desc: "Yuji Itadori swallows a cursed talisman and joins a secret school of Jujutsu Sorcerers." },
+      { id: 30021, title: "Death Note", genre: "Thriller", rating: 8.7, chapters: 108, image: "", desc: "High school prodigy Light Yagami finds a supernatural notebook that kills anyone whose name is written inside." },
+      { id: 30011, title: "Naruto", genre: "Adventure", rating: 8.3, chapters: 700, image: "", desc: "Ostracized ninja Naruto Uzumaki dreams of becoming Hokage and protecting his village." },
+      { id: 30012, title: "Bleach", genre: "Action", rating: 8.1, chapters: 686, image: "", desc: "Ichigo Kurosaki gains the powers of a Soul Reaper to defend humans from evil spirits." },
+      { id: 53390, title: "Attack on Titan", genre: "Fantasy", rating: 8.6, chapters: 139, image: "", desc: "Humanity fights for survival behind giant walls against monstrous man-eating Titans." },
+      { id: 87216, title: "Demon Slayer", genre: "Action", rating: 8.3, chapters: 205, image: "", desc: "Tanjiro Kamado becomes a demon slayer to avenge his family and cure his sister Nezuko." }
+    ].map((m, idx) => ({ ...m, thumbColor: THUMB_COLORS[idx % THUMB_COLORS.length] }));
+
+    const STORAGE_KEY = "my_manga_tracker_v1";
+    const PAGE_SIZE = 20;
+
+    const cleanState = {
+      completedIds: [],
+      customCatalog: [],
+      itemCache: {},
+      geminiKey: "",
+      geminiRecs: [],
+      filter: "all",
+      searchQuery: "",
+      currentPage: 1
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(cleanState);
+        return { ...structuredClone(cleanState), ...JSON.parse(raw), currentPage: 1 };
+      } catch {
+        return structuredClone(cleanState);
+      }
+    }
+
+    let state = loadState();
+    let liveManga = [];
+    let livePageInfo = { total: 0, lastPage: 1 };
+    let isLiveLoaded = false;
+    let isLoading = false;
+
+    function saveState() {
+      try {
+        const toSave = { ...state };
+        delete toSave.currentPage;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      } catch { /* ignore */ }
+    }
+
+    function stripHtml(str) {
+      return (str || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function getGenreClass(genre) {
+      const g = (genre || "").toLowerCase();
+      if (g.includes("adventure")) return "g-adventure";
+      if (g.includes("action")) return "g-action";
+      if (g.includes("fantasy")) return "g-fantasy";
+      if (g.includes("thriller") || g.includes("suspense")) return "g-thriller";
+      if (g.includes("mystery") || g.includes("psychological")) return "g-mystery";
+      if (g.includes("drama")) return "g-drama";
+      if (g.includes("comedy")) return "g-comedy";
+      if (g.includes("romance")) return "g-romance";
+      if (g.includes("sports")) return "g-sports";
+      if (g.includes("sci-fi")) return "g-scifi";
+      return "g-default";
+    }
+
+    // --- Live AniList Manga Fetcher (Strictly MANGA) ---
+    async function fetchLiveManga() {
+      if (state.customCatalog.length > 0) {
+        isLiveLoaded = false;
+        renderAll();
+        return;
+      }
+
+      isLoading = true;
+      document.getElementById("datasetStatus").textContent = "Loading live manga from AniList...";
+      renderTable();
+
+      const gql = `
+        query ($page: Int, $perPage: Int, $search: String) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo { total lastPage currentPage }
+            media(type: MANGA, search: $search, sort: POPULARITY_DESC, isAdult: false) {
+              id
+              title { romaji english }
+              chapters
+              averageScore
+              genres
+              description(asHtml: false)
+              coverImage { medium large }
+            }
+          }
+        }
+      `;
+      const variables = {
+        page: state.currentPage,
+        perPage: PAGE_SIZE
+      };
+      if (state.searchQuery.trim()) variables.search = state.searchQuery.trim();
+
+      try {
+        const res = await fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ query: gql, variables })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const page = json.data?.Page;
+        if (!page) throw new Error("No data");
+
+        liveManga = (page.media || []).map((m, idx) => {
+          const item = {
+            id: m.id,
+            title: m.title?.english || m.title?.romaji || "Untitled Manga",
+            genre: m.genres?.[0] || "Manga",
+            rating: m.averageScore ? Number((m.averageScore / 10).toFixed(1)) : 8.0,
+            chapters: m.chapters || null,
+            image: m.coverImage?.medium || m.coverImage?.large || "",
+            desc: stripHtml(m.description),
+            thumbColor: THUMB_COLORS[idx % THUMB_COLORS.length]
+          };
+          state.itemCache[item.id] = item;
+          return item;
+        });
+
+        livePageInfo = {
+          total: page.pageInfo?.total || liveManga.length,
+          lastPage: page.pageInfo?.lastPage || 1
+        };
+        isLiveLoaded = true;
+        document.getElementById("datasetStatus").textContent =
+          `Live AniList Manga Dataset (${livePageInfo.total.toLocaleString()} manga)`;
+      } catch (err) {
+        isLiveLoaded = false;
+        document.getElementById("datasetStatus").textContent =
+          `Offline Manga List (${SEED_MANGA.length} titles — ${err.message})`;
+      } finally {
+        isLoading = false;
+        renderAll();
+      }
+    }
+
+    // --- Gemini AI Recommendations ---
+    async function findMangaThumb(title) {
+      try {
+        const gql = `
+          query ($search: String) {
+            Media(type: MANGA, search: $search, isAdult: false) {
+              id title { romaji english } chapters averageScore genres description(asHtml: false) coverImage { medium large }
+            }
+          }
+        `;
+        const res = await fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: gql, variables: { search: title } })
+        });
+        const json = await res.json();
+        const m = json.data?.Media;
+        if (m) {
+          const item = {
+            id: m.id,
+            title: m.title?.english || m.title?.romaji || title,
+            genre: m.genres?.[0] || "Manga",
+            rating: m.averageScore ? Number((m.averageScore / 10).toFixed(1)) : 8.5,
+            chapters: m.chapters || null,
+            image: m.coverImage?.medium || m.coverImage?.large || "",
+            desc: stripHtml(m.description),
+            thumbColor: THUMB_COLORS[m.id % THUMB_COLORS.length]
+          };
+          state.itemCache[item.id] = item;
+          return item;
+        }
+      } catch { /* ignore */ }
+
+      const id = Math.abs(title.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)) + 900000;
+      return {
+        id,
+        title,
+        genre: "Manga",
+        rating: 8.5,
+        chapters: null,
+        image: "",
+        desc: "",
+        thumbColor: THUMB_COLORS[id % THUMB_COLORS.length]
+      };
+    }
+
+    async function askGemini() {
+      const apiKey = state.geminiKey.trim();
+      if (!apiKey) {
+        document.getElementById("aiDrawer").classList.add("open");
+        document.getElementById("geminiStatus").textContent = "Please paste your Gemini API Key first.";
+        document.getElementById("geminiKeyInput").focus();
+        return;
+      }
+
+      const completedTitles = state.completedIds
+        .map(id => findItemById(id)?.title)
+        .filter(Boolean);
+      const customPrompt = document.getElementById("geminiPromptInput").value.trim();
+
+      document.getElementById("geminiStatus").textContent = "Asking Gemini AI...";
+      isLoading = true;
+      state.filter = "gemini";
+      document.querySelectorAll(".pill-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === "gemini"));
+      renderTable();
+
+      const prompt = `You are a Japanese manga recommendation expert.
+Completed Manga: ${completedTitles.length ? completedTitles.join(", ") : "None yet"}
+User Request: ${customPrompt || "Recommend 10 top-tier manga tailored to the user's completed list (or great starter manga if empty). Do not repeat already completed manga."}
+
+Return ONLY valid JSON:
+{
+  "recommendations": [
+    { "title": "Exact Manga Title", "reason": "Short 1-sentence reason why" }
+  ]
+}`;
+
+      const models = ["gemini-2.5-flash", "gemini-2.0-flash"];
+      let parsed = null;
+      let errMsg = "";
+
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+          if (parsed?.recommendations?.length) break;
+        } catch (err) {
+          errMsg = err.message;
+        }
+      }
+
+      if (!parsed?.recommendations?.length) {
+        isLoading = false;
+        document.getElementById("geminiStatus").textContent = `Gemini error: ${errMsg}`;
+        renderAll();
+        return;
+      }
+
+      const enriched = await Promise.all(
+        parsed.recommendations.slice(0, 10).map(async r => {
+          const meta = await findMangaThumb(r.title);
+          return { ...meta, aiReason: r.reason };
+        })
+      );
+
+      state.geminiRecs = enriched;
+      isLoading = false;
+      saveState();
+      document.getElementById("geminiStatus").textContent = `Loaded ${enriched.length} Gemini manga picks!`;
+      renderAll();
+    }
+
+    // --- CSV Importer (manga_entries.csv) ---
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i], next = text[i + 1];
+        if (inQuotes) {
+          if (c === '"' && next === '"') { field += '"'; i++; }
+          else if (c === '"') inQuotes = false;
+          else field += c;
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ",") { row.push(field); field = ""; }
+          else if (c === "\r" && next === "\n") { row.push(field); rows.push(row); row = []; field = ""; i++; }
+          else if (c === "\n" || c === "\r") { row.push(field); rows.push(row); row = []; field = ""; }
+          else field += c;
+        }
+      }
+      if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function ingestCSV(text) {
+      const rows = parseCSV(text);
+      if (rows.length < 2) return 0;
+      const headers = rows[0].map(h => h.trim().toLowerCase());
+      const col = n => headers.indexOf(n);
+      const idxId = col("id"), idxTitle = col("english_name") !== -1 ? col("english_name") : col("title_name");
+      const idxFallbackTitle = col("title_name"), idxScore = col("score");
+      const idxGenres = col("genres"), idxChapters = col("chapters"), idxDesc = col("description");
+
+      const items = [];
+      for (let r = 1; r < rows.length; r++) {
+        const c = rows[r];
+        if (!c || c.length < 3) continue;
+        const title = (c[idxTitle] || c[idxFallbackTitle] || "").trim();
+        if (!title) continue;
+        let genre = "Manga";
+        try {
+          const gArr = JSON.parse(c[idxGenres] || "[]");
+          if (Array.isArray(gArr) && gArr[0]) genre = gArr[0];
+        } catch {
+          const rawG = (c[idxGenres] || "").replace(/[\[\]"]/g, "").split(",")[0].trim();
+          if (rawG) genre = rawG;
+        }
+        const item = {
+          id: parseInt(c[idxId], 10) || (Date.now() + r),
+          title,
+          genre,
+          rating: parseFloat(c[idxScore]) || 8.0,
+          chapters: parseInt(c[idxChapters], 10) || null,
+          image: "",
+          desc: (c[idxDesc] || "").trim(),
+          thumbColor: THUMB_COLORS[r % THUMB_COLORS.length]
+        };
+        items.push(item);
+        state.itemCache[item.id] = item;
+      }
+
+      if (items.length) {
+        state.customCatalog = items;
+        isLiveLoaded = false;
+        saveState();
+      }
+      return items.length;
+    }
+
+    // --- Helpers & Actions ---
+    function getActiveSourceList() {
+      if (state.filter === "gemini") return state.geminiRecs;
+      if (state.customCatalog.length) return state.customCatalog;
+      if (isLiveLoaded) return liveManga;
+      return SEED_MANGA;
+    }
+
+    function findItemById(id) {
+      return (
+        liveManga.find(i => i.id === id) ||
+        state.geminiRecs.find(i => i.id === id) ||
+        state.customCatalog.find(i => i.id === id) ||
+        state.itemCache[id] ||
+        SEED_MANGA.find(i => i.id === id)
+      );
+    }
+
+    function toggleCompleted(id) {
+      const item = findItemById(id);
+      if (item) state.itemCache[id] = item;
+      if (state.completedIds.includes(id)) {
+        state.completedIds = state.completedIds.filter(x => x !== id);
+      } else {
+        state.completedIds = [...state.completedIds, id];
+      }
+      saveState();
+      renderAll();
+    }
+
+    // --- Rendering ---
+    function renderCounter() {
+      const total = state.customCatalog.length
+        ? state.customCatalog.length
+        : (isLiveLoaded ? liveManga.length : SEED_MANGA.length);
+      const completedInView = state.completedIds.length;
+      document.getElementById("completedRatio").textContent = `${completedInView} / ${total}`;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("mangaTableBody");
+      const pgBar = document.getElementById("paginationBar");
+
+      if (isLoading) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Loading manga...</td></tr>`;
+        pgBar.innerHTML = "";
+        return;
+      }
+
+      let items = getActiveSourceList();
+      const q = state.searchQuery.trim().toLowerCase();
+
+      if (state.filter === "completed") {
+        items = state.completedIds.map(id => findItemById(id)).filter(Boolean);
+      } else if (state.filter === "pending") {
+        items = items.filter(i => !state.completedIds.includes(i.id));
+      }
+
+      if (q && (!isLiveLoaded || state.filter !== "all")) {
+        items = items.filter(i =>
+          i.title.toLowerCase().includes(q) ||
+          (i.genre || "").toLowerCase().includes(q)
+        );
+      }
+
+      if (!items.length) {
+        const emptyMsg = state.filter === "gemini"
+          ? "No Gemini picks yet. Click '✨ Gemini AI & Dataset' at the top, paste your Gemini API key, and click 'Ask Gemini AI'."
+          : "No manga found matching your filter.";
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">${emptyMsg}</td></tr>`;
+        pgBar.innerHTML = "";
+        return;
+      }
+
+      const displayItems = state.customCatalog.length
+        ? items.slice((state.currentPage - 1) * PAGE_SIZE, state.currentPage * PAGE_SIZE)
+        : items;
+
+      tbody.innerHTML = displayItems.map(item => {
+        const isDone = state.completedIds.includes(item.id);
+        const ratingOutOf10 = Number(item.rating).toFixed(1).replace(/\.0$/, "");
+        const thumbHTML = item.image
+          ? `<img class="manga-thumb" src="${item.image}" alt="${item.title}" loading="lazy" />`
+          : `<div class="manga-thumb" style="background:${item.thumbColor};">${item.title.slice(0, 2).toUpperCase()}</div>`;
+
+        return `
+          <tr class="manga-row ${isDone ? "is-completed" : ""}">
+            <td>
+              <div class="manga-cell" data-open="${item.id}">
+                ${thumbHTML}
+                <div class="manga-title-wrap">
+                  <span class="manga-title">${item.title}</span>
+                  ${item.chapters ? `<span class="manga-sub">${item.chapters} Chapters</span>` : ""}
+                  ${item.aiReason ? `<span class="ai-reason">✨ ${item.aiReason}</span>` : ""}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="genre-badge ${getGenreClass(item.genre)}">${item.genre}</span>
+            </td>
+            <td>
+              <span class="rating-cell">
+                <span class="star-icon">★</span>
+                <span>${ratingOutOf10}/10</span>
+              </span>
+            </td>
+            <td class="check-cell">
+              <button class="check-btn ${isDone ? "checked" : ""}" data-toggle="${item.id}" aria-label="Toggle completed">
+                ${isDone ? "✓" : ""}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      tbody.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => toggleCompleted(Number(btn.dataset.toggle)));
+      });
+
+      tbody.querySelectorAll("[data-open]").forEach(el => {
+        el.addEventListener("click", () => openModal(Number(el.dataset.open)));
+      });
+
+      // Pagination for live AniList or large CSV
+      if (state.filter === "all" && (isLiveLoaded || state.customCatalog.length > PAGE_SIZE)) {
+        const totalPages = state.customCatalog.length
+          ? Math.ceil(items.length / PAGE_SIZE)
+          : livePageInfo.lastPage;
+        const totalItems = state.customCatalog.length ? items.length : livePageInfo.total;
+
+        pgBar.innerHTML = `
+          <span>Page <strong>${state.currentPage}</strong> of <strong>${totalPages.toLocaleString()}</strong> (${totalItems.toLocaleString()} total manga)</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-glass" id="prevBtn" ${state.currentPage <= 1 ? "disabled" : ""}>‹ Prev</button>
+            <button class="btn-glass" id="nextBtn" ${state.currentPage >= totalPages ? "disabled" : ""}>Next ›</button>
+          </div>
+        `;
+        document.getElementById("prevBtn")?.addEventListener("click", () => {
+          if (state.currentPage > 1) {
+            state.currentPage--;
+            isLiveLoaded ? fetchLiveManga() : renderTable();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+        document.getElementById("nextBtn")?.addEventListener("click", () => {
+          if (state.currentPage < totalPages) {
+            state.currentPage++;
+            isLiveLoaded ? fetchLiveManga() : renderTable();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+      } else {
+        pgBar.innerHTML = "";
+      }
+    }
+
+    function openModal(id) {
+      const item = findItemById(id);
+      if (!item) return;
+      document.getElementById("modalTitle").textContent = item.title;
+      document.getElementById("modalMeta").textContent =
+        `${item.genre} • ★ ${item.rating}/10${item.chapters ? ` • ${item.chapters} Chapters` : ""}`;
+      document.getElementById("modalDesc").textContent = item.desc || "No synopsis available.";
+      document.getElementById("detailModal").classList.add("open");
+    }
+
+    function renderAll() {
+      renderCounter();
+      renderTable();
+    }
+
+    // --- Event Listeners ---
+    document.getElementById("toggleAiDrawerBtn").addEventListener("click", () => {
+      document.getElementById("aiDrawer").classList.toggle("open");
+    });
+
+    const keyInput = document.getElementById("geminiKeyInput");
+    keyInput.addEventListener("input", e => {
+      state.geminiKey = e.target.value.trim();
+      saveState();
+      document.getElementById("geminiStatus").textContent = state.geminiKey
+        ? "Gemini API Key saved"
+        : "Enter Gemini API Key to unlock AI suggestions";
+    });
+
+    document.getElementById("askGeminiBtn").addEventListener("click", askGemini);
+
+    document.querySelectorAll(".pill-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.filter = btn.dataset.filter;
+        state.currentPage = 1;
+        if (state.filter === "gemini" && !state.geminiRecs.length) {
+          document.getElementById("aiDrawer").classList.add("open");
+        }
+        renderAll();
+      });
+    });
+
+    let searchTimer;
+    document.getElementById("searchInput").addEventListener("input", e => {
+      state.searchQuery = e.target.value;
+      state.currentPage = 1;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        if (state.customCatalog.length === 0 && state.filter === "all") fetchLiveManga();
+        else renderTable();
+      }, 350);
+    });
+
+    document.getElementById("csvFileInput").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const count = ingestCSV(ev.target.result);
+        document.getElementById("aiDrawer").classList.add("open");
+        document.getElementById("datasetStatus").textContent = `Loaded ${count.toLocaleString()} manga from ${file.name}`;
+        state.currentPage = 1;
+        renderAll();
+      };
+      reader.readAsText(file);
+    });
+
+    // Full Reset
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      state = structuredClone(cleanState);
+      keyInput.value = "";
+      document.getElementById("geminiPromptInput").value = "";
+      document.getElementById("searchInput").value = "";
+      document.getElementById("csvFileInput").value = "";
+      document.getElementById("geminiStatus").textContent = "Enter Gemini API Key to unlock AI suggestions";
+      document.querySelectorAll(".pill-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === "all"));
+      fetchLiveManga();
+    });
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("detailModal").classList.remove("open");
+    });
+    document.getElementById("detailModal").addEventListener("click", e => {
+      if (e.target.id === "detailModal") document.getElementById("detailModal").classList.remove("open");
+    });
+
+    // Initial Load
+    keyInput.value = state.geminiKey || "";
+    if (state.geminiKey) document.getElementById("geminiStatus").textContent = "Gemini API Key saved";
+    fetchLiveManga();
+  </script>
+</body>
+</html>

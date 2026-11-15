@@ -1,18 +1,37 @@
-arr = ['trying', 'failed', 'done']
-n = 1
+# Experiment 8
+# File System Simulator
+import os
 
+print("=========================================")
+print(" File System Simulator")
+print("=========================================\n")
 
-def calc(a, b):
-    return (a + len(arr[b]) - len(arr) + n) % len(arr)
+filename = "student.txt"
+new_filename = "student_record.txt"
 
+# Create and Write
+with open(filename, "w") as file:
+    file.write("Operating Systems Lab\n")
+    file.write("Experiment 8\n")
+    file.write("File System Simulator\n")
+print("File Created Successfully.")
 
-k = len(arr) - 1
-while k >= 0:
-    n = calc(k, n)
+# Append Data
+with open(filename, "a") as file:
+    file.write("Python File Handling Example\n")
+print("Data Appended Successfully.")
 
-    if (n + k) % 2 == 0:
-        n = (n + len(arr[k]) - k) % len(arr)
-        k -= 1
+# Read File
+print("\nReading File Contents:\n")
+with open(filename, "r") as file:
+    print(file.read())
 
-print(arr[(n + len(arr[0]) - len(arr[1]) - len(arr) - 1) % len(arr)])
+# Rename File
+os.rename(filename, new_filename)
+print("File Renamed Successfully.")
 
+# Delete File
+os.remove(new_filename)
+print("File Deleted Successfully.")
+
+print("\nExperiment Completed Successfully.")
